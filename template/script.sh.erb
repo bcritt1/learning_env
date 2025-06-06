@@ -1,63 +1,13 @@
 #!/usr/bin/env bash
 
-# load modules
-#module reset
-#module load $(module -t av py-jupyterlab | grep <%= user_defined_context.json_python_version %>)
-#<%- unless user_defined_context.json_modules.blank? -%>
-#module load <%= user_defined_context.json_modules %>
-#<%- end -%>
+# Main script to start JupyterLab
 
-# create server configuration
-NOTEBOOK_ROOT=<%= user_defined_context.json_workspace.blank? ? "$HOME" : user_defined_context.json_workspace %>
+# Set working directory to specified path.
+cd "/farmshare/learning/scripts/scripts"
 
-# Safari users hit this error https://github.com/jupyterlab/jupyterlab/issues/5486
-# so let's make a new workspace dir that's this job's PWD and copy the defult /lab
-# workspace over there so folks can update it.
-WORKSPACE_DIR="$HOME/.jupyter/lab/workspaces"
-FILES=$(ls $WORKSPACE_DIR 2>/dev/null)
+module purge
+module load <%= context.auto_modules_python %>
+source /software/environments/admin/jupyterlab/<%= context.auto_modules_python %>/bin/activate
 
-for FILE in ${FILES[@]}; do
-  ID=$(jq -r '.metadata.id' $WORKSPACE_DIR/$FILE)
-  if [[ $ID == "/lab" ]]; then
-    WORKSPACE_FILE="$WORKSPACE_DIR/$FILE"
-    break
-  fi
-done
-if [[ ${WORKSPACE_FILE+x} ]]; then
-  cp $WORKSPACE_FILE .
-fi
-export JUPYTERLAB_WORKSPACES_DIR=$PWD
-
-#SALT=$(create_passwd 16)
-#PASSWORD_SHA1=$(echo -n "${password}${SALT}" | openssl dgst -sha1 | awk '{print $NF}')
-
-# Generate Jupyter configuration file with secure file permissions
-# configuration directives changed from NotebookApp to ServerApp at some point
-#CONFIG_FILE="${PWD}/config.py"
-<% user_defined_context.json_auto_modules_python.sub("py","").to_i >= 39 ? cfg = "Server" : cfg = "Notebook" %>
-(
-umask 077
-cat > "${CONFIG_FILE}" << EOL
-c.KernelSpecManager.ensure_native_kernel = False
-c.<%= cfg %>App.ip = '0.0.0.0'
-c.<%= cfg %>App.port = ${port}
-c.<%= cfg %>App.base_url = '/node/${host}/${port}/'
-c.<%= cfg %>App.port_retries = 0
-c.<%= cfg %>App.password = u'sha1:${SALT}:${PASSWORD_SHA1}'
-c.<%= cfg %>App.open_browser = False
-c.<%= cfg %>App.allow_origin = '*'
-c.<%= cfg %>App.notebook_dir = "$NOTEBOOK_ROOT"
-c.<%= cfg %>App.disable_check_xsrf = True
-c.LabApp.check_for_updates_class = "jupyterlab.NeverCheckForUpdate"
-EOL
-)
-
-# change workspace
-cd "$NOTEBOOK_ROOT"
-
-# list available kernels and extensions (debug)
-jupyter kernelspec list
-jupyter labextension list
-
-# Launch the Jupyter Notebook Server
-jupyter lab --config="${CONFIG_FILE}" <%= user_defined_context.json_extra_jupyter_args %>
+# Launch JupyterLab normally
+jupyter lab --config="${CONFIG_FILE}" <%= context.extra_jupyter_args %>
