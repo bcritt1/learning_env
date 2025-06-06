@@ -1,0 +1,31 @@
+# Find available port to run server on.
+port=$(find_port)
+
+# Verify port found Diagnostic Check.
+echo "Port assigned: ${port}"
+
+# Generate SHA1 encrypted password.
+SALT="$(create_passwd 16)"
+password="$(create_passwd 16)"
+PASSWORD_SHA1="$(echo -n "${password}${SALT}" | openssl dgst -sha1 | awk '{print $NF}')"
+
+echo "Generated Password: ${password}"
+
+export CONFIG_FILE="${PWD}/config.py"
+
+# Generate Jupyter configuration ensuring valid ports.
+(
+umask 077
+cat > "${CONFIG_FILE}" << EOF
+c.NotebookApp.ip = '*'
+c.NotebookApp.port = ${port}  # Ensure port value correctly assigned.
+c.NotebookApp.port_retries = 0
+c.NotebookApp.password = u'sha1:${SALT}:${PASSWORD_SHA1}'
+c.NotebookApp.base_url = '/node/${host}/${port}/'
+c.NotebookApp.open_browser = False
+c.NotebookApp.allow_origin = '*'
+c.NotebookApp.notebook_dir = '/farmshare/learning/scripts/scripts'
+c.NotebookApp.default_url = '/lab'
+c.NotebookApp.disable_check_xsrf = True
+EOF
+)

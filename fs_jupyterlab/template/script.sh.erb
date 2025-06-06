@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Main script to start JupyterLab
+
+# Set working directory to specified path.
+cd "/farmshare/learning/scripts/scripts"
+
+module purge
+module load <%= context.auto_modules_python %>
+source /software/environments/admin/jupyterlab/<%= context.auto_modules_python %>/bin/activate
+
+# Launch JupyterLab normally
+jupyter lab --config="${CONFIG_FILE}" <%= context.extra_jupyter_args %>

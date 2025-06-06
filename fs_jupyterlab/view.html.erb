@@ -1,0 +1,58 @@
+<%-
+  base_url  = "/node/#{host}/#{port}"
+  login_url = "#{base_url}/login"
+  next_url  = "#{base_url}/lab/tree/IPYNBs/welcome.ipynb"  # Setup for file loading dynamically
+  full_url  = "#{login_url}?next=#{CGI.escape(next_url)}"
+  form_id   = "juypyter_form_#{login_url.gsub('/', '_')}"
+%>
+
+<script type="text/javascript">
+  function changeTarget() {
+    const agent = navigator.userAgent;
+    if (/Mozilla\/5\.0 \(Macintosh; Intel Mac OS X \d+_\d+_\d+\) AppleWebKit\/\d+\.\d+\.\d+ \(KHTML, like Gecko\)/.test(agent)) {
+      document.getElementById("<%= form_id %>").target = "_self";
+    }
+  }
+
+  window.onload = function() {
+    setupPanes();
+  };
+
+  // Setup panes after login dynamically
+  function setupPanes() {
+    const ipynbPath = '/node/<%= host %>/<%= port %>/notebooks/IPYNBs/welcome.ipynb';
+
+    // Load file browser in the left pane.
+    const fileBrowserPane = document.createElement('iframe');
+    fileBrowserPane.src = '/node/<%= host %>/<%= port %>/lab/tree/';
+    fileBrowserPane.style.width = '20%'; 
+    fileBrowserPane.style.height = '100%';
+    fileBrowserPane.style.float = 'left';
+
+    // Load welcome IPYNB in the middle pane.
+    const ipynbPane = document.createElement('iframe');
+    ipynbPane.src = ipynbPath;
+    ipynbPane.style.width = '60%'; 
+    ipynbPane.style.height = '100%';
+    ipynbPane.style.float = 'left';
+
+    // Load terminal window in the right pane.
+    const terminalPane = document.createElement('iframe');
+    terminalPane.src = '/node/<%= host %>/<%= port %>/lab/terminals/1';
+    terminalPane.style.width = '20%'; 
+    terminalPane.style.height = '100%';
+    terminalPane.style.float = 'left';
+
+    // Append panes to the body
+    document.body.appendChild(fileBrowserPane);
+    document.body.appendChild(ipynbPane);
+    document.body.appendChild(terminalPane);
+  }
+</script>
+
+<form id="<%= form_id %>" action="<%= full_url %>" method="post" target="_blank" onsubmit="changeTarget()">
+  <input type="hidden" name="password" value="<%= password %>">
+  <button class="btn btn-primary" type="submit">
+    <i class="fa fa-cogs"></i> Connect to Jupyter
+  </button>
+</form>
