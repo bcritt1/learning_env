@@ -1,7 +1,7 @@
 <%-
   base_url  = "/node/#{host}/#{port}"
   login_url = "#{base_url}/login"
-  next_url  = "#{base_url}/lab/tree/IPYNBs/welcome.ipynb"  # Setup for file loading dynamically
+  next_url  = "#{base_url}/lab/workspaces/farmshare-learning"  # Setup for file loading dynamically
   full_url  = "#{login_url}?next=#{CGI.escape(next_url)}"
   form_id   = "juypyter_form_#{login_url.gsub('/', '_')}"
 %>
