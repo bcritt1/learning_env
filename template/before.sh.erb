@@ -2,8 +2,8 @@
 [ -d $HOME/.jupyter/lab/workspaces ] || mkdir -p $HOME/.jupyter/lab/workspaces
 
 # Link Learning workspace
-[ -L $HOME/.jupyter/lab/workspaces/farmshare-learning-4611.jupyterlab-workspace ] || \\
-ln -s /farmshare/learning/scripts/scripts/farmshare-learning.jupyterlab-workspace \\
+[ -L $HOME/.jupyter/lab/workspaces/farmshare-learning-4611.jupyterlab-workspace ] || \
+ln -s /farmshare/learning/scripts/scripts/farmshare-learning.jupyterlab-workspace \
 $HOME/.jupyter/lab/workspaces/farmshare-learning-4611.jupyterlab-workspace
 
 # Find available port to run server on.
@@ -16,7 +16,7 @@ echo "Port assigned: ${port}"
 SALT="$(create_passwd 16)"
 password="$(create_passwd 16)"
 PASSWORD_SHA1="$(echo -n "${password}${SALT}" | openssl dgst -sha1 | awk '{print $NF}')"
-\
+
 echo "Generated Password: ${password}"
 
 export CONFIG_FILE="${PWD}/config.py"
